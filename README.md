@@ -1,17 +1,19 @@
 # FarmStock Backend — API REST
 
-![Java](https://img.shields.io/badge/Java-ED8B00?style=flat&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat&logo=springboot&logoColor=white)
+![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-6DB33F?style=flat&logo=springboot&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-C71A36?style=flat&logo=apachemaven&logoColor=white)
 ![Offline](https://img.shields.io/badge/Funciona-sin%20conexi%C3%B3n-2EA44F?style=flat)
-![Estado](https://img.shields.io/badge/Estado-%F0%9F%94%A7%20COMPLETAR-lightgrey?style=flat)
+![Estado](https://img.shields.io/badge/Estado-Completado-2EA44F?style=flat)
 
-**FarmStock** es un sistema de inventario para la gestión de **herramientas y demás elementos de la finca del SENA ubicada en El Zulia (Cúcuta), Norte de Santander**.
+**FarmStock** es un sistema de inventario para la gestión de **herramientas y equipos de la finca del SENA ubicada en El Zulia (Cúcuta), Norte de Santander**.
 
-Este repositorio contiene el **backend de FarmStock**, una API REST desarrollada con **Java y Spring Boot** que centraliza la lógica de negocio y la persistencia de los datos del inventario. Es consumida por la aplicación de escritorio de FarmStock, desarrollada con Electron.
+Este repositorio contiene el **backend de FarmStock**: una API REST desarrollada con **Java y Spring Boot** que gestiona herramientas, préstamos, mantenimientos, aprendices, usuarios y equipos de cómputo, genera códigos QR y envía notificaciones por correo. Es consumida por la aplicación de escritorio de FarmStock, desarrollada con Electron.
 
-El sistema fue diseñado para **funcionar sin una conexión estable a internet**, una condición habitual en entornos rurales como el de la finca.
+El sistema se diseñó para **funcionar sin una conexión estable a internet**: la API y la base de datos MySQL se ejecutan localmente, sin depender de servicios en la nube. El envío de correos es la única función que requiere internet.
 
-> 🔧 **COMPLETAR:** indica si fue un proyecto desarrollado de forma individual o en equipo, y en qué contexto (por ejemplo, proyecto formativo del SENA).
+El sistema fue **diseñado y desarrollado de forma individual**.
 
 ---
 
@@ -24,7 +26,7 @@ El sistema fue diseñado para **funcionar sin una conexión estable a internet**
 - [Endpoints de la API](#-endpoints-de-la-api)
 - [Requisitos](#-requisitos)
 - [Instalación y ejecución local](#️-instalación-y-ejecución-local)
-- [Estructura del proyecto](#️-estructura-del-proyecto)
+- [Compilación](#-compilación)
 - [Pruebas](#-pruebas)
 - [Ecosistema FarmStock](#-ecosistema-farmstock)
 - [Estado del proyecto](#-estado-del-proyecto)
@@ -36,37 +38,58 @@ El sistema fue diseñado para **funcionar sin una conexión estable a internet**
 
 ## ✨ Características principales
 
-- API REST para la gestión del inventario de herramientas y elementos de la finca
-- Desarrollada con Java y Spring Boot
-- Persistencia de datos en base de datos
-- Diseñada para operar sin conexión estable a internet
-
-> 🔧 **COMPLETAR:** reemplaza o amplía esta lista con las funciones reales de la API. Por ejemplo: CRUD de herramientas, categorías, control de entradas y salidas, préstamos, usuarios y autenticación, validación de datos, manejo de errores, documentación con Swagger. Deja solo lo que realmente existe en el código.
+- 🛠️ **Herramientas:** CRUD, consulta de las registradas hoy y detalle por unidad con código único.
+- 🔲 **Códigos QR** para cada unidad de herramienta, generados con ZXing.
+- 🤝 **Préstamos:** creación, devolución por código, consulta de activos y devueltos, e historial por usuario.
+- 🔧 **Mantenimientos:** registro, seguimiento de estado y consulta por herramienta, tipo o usuario.
+- 📊 **Estadísticas** por herramienta (préstamos, daños y mantenimientos).
+- 👥 **Usuarios y aprendices:** registro, búsqueda por documento o ficha, e inicio de sesión.
+- 💻 **Equipos de cómputo:** registro, entradas y salidas, historial y consulta por código o cédula.
+- 📧 **Notificaciones por correo** mediante Resend.
+- ✅ **Validación de datos** y **manejo global de excepciones**.
+- 🧪 **Pruebas** unitarias, de integración y de rendimiento.
 
 ---
 
 ## 📡 Funcionamiento sin conexión
 
-La finca no siempre cuenta con internet estable, por lo que FarmStock se planteó desde el inicio para **no depender de una conexión permanente**. Por eso el backend y la aplicación de escritorio están pensados para ejecutarse localmente, sin servicios alojados en la nube.
-
-> 🔧 **COMPLETAR:** explica en dos o tres frases cómo se logra esto realmente. Por ejemplo: dónde se ejecuta el backend (en el mismo equipo de la aplicación o en un computador de la red local), qué base de datos se usa y dónde se almacenan los datos, y si hay respaldos.
+La finca no siempre cuenta con internet estable, por lo que la API y la base de datos se ejecutan en el equipo local. Las funciones de inventario, préstamos, mantenimientos, estadísticas y generación de QR no necesitan conexión. Solo el envío de correos por Resend requiere internet.
 
 ---
 
 ## 🏗️ Arquitectura
 
+El backend usa una **arquitectura por capas**:
+
 ```text
-FarmStock Frontend (Electron)
-            │
-            │ REST API
-            ▼
-   FarmStock Backend (Spring Boot)
-            │
-            ▼
-      Base de datos
+src/main/java/com/FarmStock_Backend/FarmStock/
+│
+├── Controller/     # Endpoints REST
+├── Service/        # Lógica de negocio
+├── Repository/     # Acceso a datos (Spring Data JPA)
+├── Model/          # Entidades de persistencia
+├── DTO/            # Objetos de transferencia de datos
+├── Config/         # CORS y manejo global de excepciones
+└── FarmStockApplication.java
 ```
 
-> 🔧 **COMPLETAR:** confirma el flujo. Si el backend usa una arquitectura por capas (controller, service, repository), descríbela aquí con un árbol de carpetas o un diagrama de flujo de una solicitud.
+### Flujo general de una solicitud
+
+```text
+Cliente (Electron)
+        │
+        ▼
+   Controller
+        │
+        ▼
+    Service
+        │
+        ▼
+   Repository
+        │
+        ▼
+      MySQL
+```
 
 ---
 
@@ -74,31 +97,44 @@ FarmStock Frontend (Electron)
 
 | Tecnología | Uso |
 |---|---|
-| Java | Lenguaje principal |
-| Spring Boot | Framework backend |
-
-> 🔧 **COMPLETAR:** agrega el resto según tu `pom.xml` o `build.gradle`: versión de Java y de Spring Boot, Spring Data JPA, base de datos utilizada, herramienta de construcción (Maven o Gradle), y cualquier otra dependencia relevante.
+| Java 21 | Lenguaje principal |
+| Spring Boot 3.5.5 | Framework backend |
+| Spring Web | API REST |
+| Spring Data JPA / Hibernate | Persistencia |
+| Spring Validation | Validación de datos |
+| MySQL | Base de datos |
+| ZXing 3.5.3 | Generación de códigos QR |
+| Resend Java SDK | Envío de correos |
+| Lombok | Reducción de código repetitivo |
+| Maven | Gestión de dependencias |
+| JUnit | Pruebas |
 
 ---
 
 ## 🔌 Endpoints de la API
 
-> 🔧 **COMPLETAR:** si la API tiene documentación interactiva (Swagger / OpenAPI), escribe aquí su dirección local. Si no, agrega una tabla breve con los endpoints principales, por ejemplo:
->
-> | Método | Ruta | Descripción |
-> |---|---|---|
-> | GET | `/ruta` | Descripción |
+| Módulo | Ruta base | Operaciones principales |
+|---|---|---|
+| Herramientas | `/herramienta` | CRUD, `/hoy` |
+| Detalle de herramienta | `/api/herramienta-detalle` | Por herramienta, por código único, QR |
+| Préstamos | `/prestamos` | `/crear`, `/devolver/codigo/{codigo}`, `/activos`, `/devueltos`, `/todos` |
+| Mantenimientos | `/mantenimientos` | CRUD, `/activos`, cambio de estado, estadísticas |
+| Estadísticas | `/estadisticas` | `/herramientas`, `/herramientas/{id}` |
+| Usuarios | `/usuario` | CRUD, `/login`, `/documento/{numero}` |
+| Aprendices | `/aprendices` | CRUD, `/buscar` |
+| Equipos de cómputo | `/equipos-computos` | CRUD, `/salida`, `/entrada`, `/historial`, `/movimientos` |
+| Códigos QR | `/qr/{archivo}` | Descarga de la imagen QR |
+| Notificaciones | `/api/notificaciones/resend` | Envío de correos |
 
 ---
 
 ## 📋 Requisitos
 
-Para ejecutar el proyecto localmente se requiere:
-
-- Java JDK
+- Java 21
+- MySQL
 - Git
 
-> 🔧 **COMPLETAR:** indica la versión de Java necesaria, la herramienta de construcción (Maven o Gradle) y la base de datos que debe estar instalada o disponible, si aplica.
+Maven no es necesario instalarlo: el proyecto incluye el Maven Wrapper (`mvnw`).
 
 ---
 
@@ -111,59 +147,96 @@ git clone https://github.com/x6Darck/FarmStock_Backend.git
 cd FarmStock_Backend
 ```
 
-### 2. Configurar la aplicación
+### 2. Crear la base de datos
 
-> 🔧 **COMPLETAR:** explica cómo configurar la conexión a la base de datos y cualquier otra variable necesaria. Si el repo incluye un archivo de ejemplo (como `.env.example` o `application.properties.example`), indica cómo copiarlo. **No escribas contraseñas ni claves reales en el README.**
+```sql
+CREATE DATABASE farmstock;
+```
 
-### 3. Ejecutar la aplicación
+Hibernate crea y actualiza las tablas automáticamente (`spring.jpa.hibernate.ddl-auto=update`).
+
+### 3. Configurar la aplicación
+
+Completa los valores en `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/farmstock
+spring.datasource.username=tu_usuario
+spring.datasource.password=tu_contraseña
+
+# Solo si usas el envío de correos
+resend.api.key=tu_api_key
+resend.from=Nombre <correo@tudominio.com>
+```
+
+> [!IMPORTANT]
+> No subas contraseñas ni claves reales al repositorio. Puedes usar variables de entorno en su lugar: `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` y `RESEND_API_KEY`.
+
+### 4. Ejecutar la aplicación
+
+**Linux / macOS**
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-> 🔧 **COMPLETAR:** este comando supone que el proyecto usa Maven con wrapper. Si usa Gradle, el comando es `./gradlew bootRun`. En Windows, reemplaza `./mvnw` por `.\mvnw.cmd`. Indica también el puerto en el que queda disponible la API.
+**Windows**
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+La API queda disponible por defecto en `http://localhost:8080`.
+
+Los códigos QR se generan en la carpeta `codigos_qr/`, que se crea al ejecutar la aplicación.
 
 ---
 
-## 🗂️ Estructura del proyecto
+## 📦 Compilación
 
-```text
-FarmStock_Backend/
-│
-└── (COMPLETAR: pega aquí la estructura real de carpetas)
+```bash
+./mvnw clean package
 ```
 
-> 🔧 **COMPLETAR:** en Windows puedes obtenerla con `tree /F` dentro de la carpeta del proyecto. Deja solo las carpetas y los archivos principales, y agrega una breve descripción a cada uno.
+El archivo generado queda en `target/FarmStock-0.0.1-SNAPSHOT.jar` y se ejecuta con:
+
+```bash
+java -jar target/FarmStock-0.0.1-SNAPSHOT.jar
+```
 
 ---
 
 ## 🧪 Pruebas
 
-> 🔧 **COMPLETAR:** si el proyecto tiene pruebas, indica el comando (por ejemplo `./mvnw test`). Si no las tiene, elimina esta sección y su enlace en la tabla de contenido.
+El proyecto incluye pruebas sobre aprendices, herramientas y detalles de herramienta, además de una prueba de rendimiento:
+
+```bash
+./mvnw test
+```
 
 ---
 
 ## 🔄 Ecosistema FarmStock
 
-FarmStock está compuesto por dos aplicaciones.
-
-### 🖥️ FarmStock Frontend
-
-Aplicación de escritorio desarrollada con **Electron**, que ofrece la interfaz para gestionar el inventario.
-
-**Repositorio:** [github.com/x6Darck/FarmStock_Front](https://github.com/x6Darck/FarmStock_Front)
+FarmStock se compone de dos repositorios.
 
 ### ⚙️ FarmStock Backend
 
-API REST desarrollada con **Spring Boot** (este repositorio).
+API REST con **Java y Spring Boot** (este repositorio).
 
 **Repositorio:** [github.com/x6Darck/FarmStock_Backend](https://github.com/x6Darck/FarmStock_Backend)
+
+### 🖥️ FarmStock Frontend
+
+Aplicación de escritorio desarrollada con **Electron**, con interfaz en HTML, CSS y JavaScript, que consume esta API.
+
+**Repositorio:** [github.com/x6Darck/FarmStock_Front](https://github.com/x6Darck/FarmStock_Front)
 
 ---
 
 ## 📌 Estado del proyecto
 
-**Estado:** 🔧 COMPLETAR (por ejemplo: Completado / En uso / En desarrollo)
+**Estado:** Completado
 
 FarmStock fue desarrollado para cubrir una necesidad real de control de inventario en la finca del SENA ubicada en El Zulia (Cúcuta), con la condición de funcionar sin conexión estable a internet.
 
@@ -171,7 +244,17 @@ FarmStock fue desarrollado para cubrir una necesidad real de control de inventar
 
 ## 👨‍💻 Desarrollo
 
-> 🔧 **COMPLETAR:** lista lo que hiciste tú en esta parte del proyecto, con frases cortas. Por ejemplo: diseño de la API, modelado de la base de datos, validaciones, manejo de errores, configuración para funcionar sin conexión. Incluye solo lo que sea cierto.
+FarmStock fue **diseñado, estructurado y desarrollado de forma individual**. En el backend se realizó:
+
+- Diseño de la API REST y de la arquitectura por capas
+- Modelado de la base de datos con JPA e Hibernate
+- Módulos de herramientas, préstamos, mantenimientos, aprendices, usuarios y equipos de cómputo
+- Generación de códigos QR para cada unidad de herramienta
+- Estadísticas por herramienta
+- Envío de notificaciones por correo con Resend
+- Validación de datos y manejo global de excepciones
+- Pruebas unitarias, de integración y de rendimiento
+- Integración con la aplicación de escritorio
 
 ---
 
@@ -179,17 +262,9 @@ FarmStock fue desarrollado para cubrir una necesidad real de control de inventar
 
 FarmStock fue desarrollado para la finca del SENA ubicada en El Zulia (Cúcuta).
 
-Este repositorio se presenta con fines demostrativos y de **portafolio profesional**. Su publicación no implica la transferencia de derechos de propiedad intelectual ni autorización para copiar, modificar, distribuir o utilizar el software con fines comerciales.
+Este repositorio se publica **únicamente con fines demostrativos y de portafolio profesional**. Su publicación no implica la transferencia de derechos de propiedad intelectual ni autorización para copiar, modificar, distribuir o utilizar el software con fines comerciales.
 
-> 🔧 **COMPLETAR:** confirma que puedes publicar el proyecto y que este texto es compatible con los acuerdos o las normas de propiedad intelectual bajo los que se desarrolló.
-
-El repositorio no incluye:
-
-- Credenciales
-- Contraseñas
-- Datos personales
-- Información sensible
-- Configuraciones privadas
+El repositorio no incluye credenciales, contraseñas, datos personales ni configuraciones privadas.
 
 ---
 
@@ -197,9 +272,11 @@ El repositorio no incluye:
 
 **Jean Pier Gómez**
 
+Desarrollo individual de FarmStock.
+
 ---
 
 <p align="center">
   <strong>FarmStock — Sistema de inventario para la finca del SENA</strong><br>
-  Desarrollado con Spring Boot y Electron.
+  Desarrollado con Electron y Spring Boot.
 </p>
